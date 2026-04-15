@@ -41,7 +41,7 @@ def profile():
     name = request.form.get("name")
     pw = request.form.get("password")
     pwh = hashlib.sha256()
-    pwh.update(pw)
+    pwh.update(pw.encode("utf-8"))
     pwh.hexdigest
 
     if name != '' and pw != '':
