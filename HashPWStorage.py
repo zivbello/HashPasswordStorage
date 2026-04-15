@@ -42,8 +42,8 @@ def profile():
     pw = request.form.get("password")
     pwh = hashlib.sha256()
     pwh.update(pw.encode("utf-8"))
-    pwh_hash = pwh.hexdigest
-    pwh_str = f"{pwh_hash}" # TODO: Have db store actual hash, not description of hash object
+    pwh_hash = pwh.hexdigest()
+    pwh_str = f"{pwh_hash}"
 
     if name != '' and pw != '':
         p = Profile(name=name, pwh=pwh_str)
