@@ -19,13 +19,13 @@ migrate = Migrate(app, db)
 # Model
 class Profile(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(20), unique=False, nullable=False)
+    name = db.Column(db.String(20), unique=False, nullable=False)
     pwh = db.Column(db.String(20), nullable=False)
 
     # repr method represents how one object of this datatable
     # will look like
     def __repr__(self):
-        return f"Name : {self.username}, Password Hash: {self.pwh}"
+        return f"Name : {self.name}, Password Hash: {self.pwh}"
 
 # function to render index page
 @app.route('/')
@@ -48,7 +48,7 @@ def login():
         pwh = hashlib.sha256()
         pwh.update(password.encode("utf-8"))
         pwh_hash = pwh.hexdigest()
-        user = db.one_or_404(db.select(Profile).filter_by(username=username))
+        user = db.one_or_404(db.select(Profile).filter_by(name=username))
         if user.pwh == pwh_hash:
             return redirect('/') # TODO: Create a page to navigate to after logging in
         else:
@@ -66,7 +66,7 @@ def profile():
     pwh_str = f"{pwh_hash}"
 
     if username != '' and pw != '':
-        p = Profile(username=username, pwh=pwh_str)
+        p = Profile(name=username, pwh=pwh_str)
         db.session.add(p)
         db.session.commit()
         return redirect('/')
