@@ -4,6 +4,7 @@
 from flask import Flask, request, redirect
 from flask.templating import render_template
 from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
 
 import hashlib
 
@@ -13,6 +14,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///site.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False  # Avoids a warning
 
 db = SQLAlchemy(app)
+migrate = Migrate(app, db)
 
 # Model
 class Profile(db.Model):
