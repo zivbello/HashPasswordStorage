@@ -25,7 +25,7 @@ class Profile(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(20), unique=False, nullable=False)
     pwh = db.Column(db.String(20), nullable=False)
-    hashid = db.Column(db.String(20, nullable=False))
+    hashid = db.Column(db.String(20), nullable=False)
 
     # repr method represents how one object of this datatable
     # will look like
