@@ -8,15 +8,17 @@ from flask_migrate import Migrate
 
 import hashlib
 
+# Flask setup
 app = Flask(__name__)
 app.debug = True
+# SQL setup
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///site.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False  # Avoids a warning
-
 db = SQLAlchemy(app)
+# Migrate setup
 migrate = Migrate(app, db)
 
-# Model
+# db Model
 class Profile(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(20), unique=False, nullable=False)
@@ -27,42 +29,49 @@ class Profile(db.Model):
     def __repr__(self):
         return f"Name : {self.username}, Password Hash: {self.pwh}"
 
-# function to render index page
+# Function to render index page
 @app.route('/')
 def index():
     profiles = Profile.query.all()
     return render_template('index.html', profiles=profiles)
 
-# function to render add profile page
+# Function to render add profile page
 @app.route('/add_data')
 def add_data():
     return render_template('add_profile.html')
 
-# function to render login page and check passwords
+# Function to render login page and check passwords
 @app.route('/login', methods=["GET", "POST"])
 def login():
     msg = ''
     if request.method == "POST" and 'username' in request.form and 'password' in request.form:
+        # Get username and password from form
         username = request.form.get("username")
         password = request.form.get("password")
+        # Create hash object using password from form
         pwh = hashlib.sha256()
         pwh.update(password.encode("utf-8"))
         pwh_hash = pwh.hexdigest()
+        # Find actual password using username from form
         user = db.one_or_404(db.select(Profile).filter_by(username=username))
+        # Check password
         if user.pwh == pwh_hash:
             return redirect('/') # TODO: Create a page to navigate to after logging in
         else:
             msg = "Login unsuccessful. Incorrect username/password!"
     return render_template('login.html', msg=msg)
 
-# function to add profiles
+# Function to add profiles
 @app.route('/add', methods=["POST"])
 def profile():
+    # Get username and password from form
     username = request.form.get("username")
     pw = request.form.get("password")
+    # Create hash object using password from form
     pwh = hashlib.sha256()
     pwh.update(pw.encode("utf-8"))
     pwh_hash = pwh.hexdigest()
+    # Convert digest into string
     pwh_str = f"{pwh_hash}"
 
     if username != '' and pw != '':
@@ -73,7 +82,7 @@ def profile():
     else:
         return redirect('/')
 
-# function to delete table entries
+# Function to delete table entries
 @app.route('/delete/<int:id>')
 def erase(id): 
     data = Profile.query.get(id)
