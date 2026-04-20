@@ -7,6 +7,8 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 
 import hashlib
+import string
+import random
 
 # Flask setup
 app = Flask(__name__)
@@ -23,11 +25,12 @@ class Profile(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(20), unique=False, nullable=False)
     pwh = db.Column(db.String(20), nullable=False)
+    hashid = db.Column(db.String(20), nullable=False)
 
     # repr method represents how one object of this datatable
     # will look like
     def __repr__(self):
-        return f"Name : {self.username}, Password Hash: {self.pwh}"
+        return f"ID: {self.hashid}, Name : {self.username}, Password Hash: {self.pwh}"
 
 # Function to render index page
 @app.route('/')
@@ -73,9 +76,24 @@ def profile():
     pwh_hash = pwh.hexdigest()
     # Convert digest into string
     pwh_str = f"{pwh_hash}"
+    
+    ##
+    # Source - https://stackoverflow.com/a/23728630
+    # Posted by Randy Marsh, modified by community. See post 'Timeline' for change history
+    # Retrieved 2026-04-17, License - CC BY-SA 4.0  
+    ##
+    # Create salt for id hash
+    salt = ''.join(random.SystemRandom().choice(string.ascii_letters + string.digits) for _ in range(6))
+    salted_user = username + salt
+    # Create hash object using username and salt
+    unh = hashlib.md5()
+    unh.update(salted_user.encode("utf-8"))
+    unh_hash = unh.hexdigest()
+    # Convert digest into string
+    hashid = f"{unh_hash}"
 
     if username != '' and pw != '':
-        p = Profile(username=username, pwh=pwh_str)
+        p = Profile(username=username, pwh=pwh_str, hashid=hashid)
         db.session.add(p)
         db.session.commit()
         return redirect('/')

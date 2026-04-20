@@ -10,6 +10,7 @@
       <table>
          <thead>
             <th>Id</th>
+            <th>Hash ID</th>
             <th>Username</th>
             <th>Password Hash</th>
             <th>#</th>
@@ -17,6 +18,7 @@
          {% for data in profiles %}
          <tbody>
             <td>{{data.id}}</td>
+            <td>{{data.hashid}}</td>
             <td>{{data.username}}</td>
             <td>{{data.pwh}}</td>
             <td><a href="/delete/{{data.id}}" type="button">Delete</a></td>
