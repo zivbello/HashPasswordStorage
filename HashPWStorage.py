@@ -25,11 +25,12 @@ class Profile(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(20), unique=False, nullable=False)
     pwh = db.Column(db.String(20), nullable=False)
+    hashid = db.Column(db.String(20, nullable=False))
 
     # repr method represents how one object of this datatable
     # will look like
     def __repr__(self):
-        return f"Name : {self.username}, Password Hash: {self.pwh}"
+        return f"ID: {self.hashid}, Name : {self.username}, Password Hash: {self.pwh}"
 
 # Function to render index page
 @app.route('/')
@@ -92,7 +93,7 @@ def profile():
     hashid = f"{unh_hash}"
 
     if username != '' and pw != '':
-        p = Profile(username=username, pwh=pwh_str)
+        p = Profile(username=username, pwh=pwh_str, hashid=hashid)
         db.session.add(p)
         db.session.commit()
         return redirect('/')
