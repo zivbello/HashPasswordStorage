@@ -70,12 +70,12 @@ def profile():
     # Get username and password from form
     username = request.form.get("username")
     pw = request.form.get("password")
-    # Create hash object using password from form
-    pwh = hashlib.sha256()
-    pwh.update(pw.encode("utf-8"))
-    pwh_hash = pwh.hexdigest()
+    # Create hash object using username from form
+    unh = hashlib.md5()
+    unh.update(username.encode("utf-8"))
+    unh_hash = unh.hexdigest()
     # Convert digest into string
-    pwh_str = f"{pwh_hash}"
+    hashid = f"{unh_hash}"
     
     ##
     # Source - https://stackoverflow.com/a/23728630
@@ -84,13 +84,17 @@ def profile():
     ##
     # Create salt for id hash
     salt = ''.join(random.SystemRandom().choice(string.ascii_letters + string.digits) for _ in range(6))
-    salted_user = username + salt
-    # Create hash object using username and salt
-    unh = hashlib.md5()
-    unh.update(salted_user.encode("utf-8"))
-    unh_hash = unh.hexdigest()
-    # Convert digest into string
-    hashid = f"{unh_hash}"
+    sh = hashlib.sha256()
+    sh.update(salt.encode("utf-8"))
+    salt_hash = sh.hexdigest()
+    # Create hash object using password
+    pwh = hashlib.sha256()
+    pwh.update(pw.encode("utf-8"))
+    pw_hash = pwh.hexdigest()
+    # Convert digests into string
+    pwh_str = f"{pw_hash}"
+    salt_str = f"{salt_hash}"
+    pwh_str += salt_str
 
     if username != '' and pw != '':
         p = Profile(username=username, pwh=pwh_str, hashid=hashid)
