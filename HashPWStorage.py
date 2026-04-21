@@ -26,6 +26,7 @@ class Profile(db.Model):
     username = db.Column(db.String(20), unique=False, nullable=False)
     pwh = db.Column(db.String(20), nullable=False)
     hashid = db.Column(db.String(20), nullable=False)
+    salt = db.Column(db.String(20), nullable=False)
 
     # repr method represents how one object of this datatable
     # will look like
@@ -58,7 +59,7 @@ def login():
         # Find actual password using username from form
         user = db.one_or_404(db.select(Profile).filter_by(username=username))
         # Check password
-        if user.pwh == pwh_hash:
+        if (pwh_hash + user.salt) == user.pwh:
             return redirect('/') # TODO: Create a page to navigate to after logging in
         else:
             msg = "Login unsuccessful. Incorrect username/password!"
@@ -82,7 +83,7 @@ def profile():
     # Posted by Randy Marsh, modified by community. See post 'Timeline' for change history
     # Retrieved 2026-04-17, License - CC BY-SA 4.0  
     ##
-    # Create salt for id hash
+    # Create salt for pw hash
     salt = ''.join(random.SystemRandom().choice(string.ascii_letters + string.digits) for _ in range(6))
     sh = hashlib.sha256()
     sh.update(salt.encode("utf-8"))
@@ -97,7 +98,7 @@ def profile():
     pwh_str += salt_str
 
     if username != '' and pw != '':
-        p = Profile(username=username, pwh=pwh_str, hashid=hashid)
+        p = Profile(username=username, pwh=pwh_str, hashid=hashid, salt=salt_str)
         db.session.add(p)
         db.session.commit()
         return redirect('/')

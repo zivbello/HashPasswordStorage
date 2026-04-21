@@ -13,6 +13,7 @@
             <th>Hash ID</th>
             <th>Username</th>
             <th>Password Hash</th>
+            <th>Salt</th>
             <th>#</th>
          </thead>
          {% for data in profiles %}
@@ -21,6 +22,7 @@
             <td>{{data.hashid}}</td>
             <td>{{data.username}}</td>
             <td>{{data.pwh}}</td>
+            <td>{{data.salt}}</td>
             <td><a href="/delete/{{data.id}}" type="button">Delete</a></td>
          </tbody>
          {% endfor%}
