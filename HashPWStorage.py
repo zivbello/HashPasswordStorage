@@ -52,14 +52,16 @@ def login():
         # Get username and password from form
         username = request.form.get("username")
         password = request.form.get("password")
-        # Create hash object using password from form
+        # Find user table entry using username from form
+        user = db.one_or_404(db.select(Profile).filter_by(username=username))
+        # Create hash object using password from form and salt from user entry
         pwh = hashlib.sha256()
         pwh.update(password.encode("utf-8"))
+        pwh.update(user.salt.encode("utf-8"))
         pwh_hash = pwh.hexdigest()
-        # Find actual password using username from form
-        user = db.one_or_404(db.select(Profile).filter_by(username=username))
+        
         # Check password
-        if (pwh_hash + user.salt) == user.pwh:
+        if pwh_hash == user.pwh:
             return redirect('/') # TODO: Create a page to navigate to after logging in
         else:
             msg = "Login unsuccessful. Incorrect username/password!"
@@ -71,6 +73,7 @@ def profile():
     # Get username and password from form
     username = request.form.get("username")
     pw = request.form.get("password")
+    
     # Create hash object using username from form
     unh = hashlib.md5()
     unh.update(username.encode("utf-8"))
@@ -78,27 +81,24 @@ def profile():
     # Convert digest into string
     hashid = f"{unh_hash}"
     
-    ##
+    ## Credit for creating salt string
     # Source - https://stackoverflow.com/a/23728630
     # Posted by Randy Marsh, modified by community. See post 'Timeline' for change history
     # Retrieved 2026-04-17, License - CC BY-SA 4.0  
     ##
     # Create salt for pw hash
     salt = ''.join(random.SystemRandom().choice(string.ascii_letters + string.digits) for _ in range(6))
-    sh = hashlib.sha256()
-    sh.update(salt.encode("utf-8"))
-    salt_hash = sh.hexdigest()
-    # Create hash object using password
+
+    # Create hash object using password + salt
     pwh = hashlib.sha256()
     pwh.update(pw.encode("utf-8"))
+    pwh.update(salt.encode("utf-8"))
     pw_hash = pwh.hexdigest()
     # Convert digests into string
     pwh_str = f"{pw_hash}"
-    salt_str = f"{salt_hash}"
-    pwh_str += salt_str
 
     if username != '' and pw != '':
-        p = Profile(username=username, pwh=pwh_str, hashid=hashid, salt=salt_str)
+        p = Profile(username=username, pwh=pwh_str, hashid=hashid, salt=salt)
         db.session.add(p)
         db.session.commit()
         return redirect('/')
